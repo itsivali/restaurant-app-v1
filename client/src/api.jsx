@@ -1,7 +1,7 @@
 // Fetch all restaurants
 export async function fetchRestaurants() {
     try {
-        const response = await fetch("http://localhost:5555/restaurants");
+        const response = await fetch("http://127.0.0.1:5555/restaurants");
         if (!response.ok) {
             throw new Error("Failed to fetch restaurants");
         }
@@ -15,7 +15,7 @@ export async function fetchRestaurants() {
 // Fetch a specific restaurant by ID
 export async function fetchRestaurantById(id) {
     try {
-        const response = await fetch(`http://localhost:5555/restaurants/${id}`);
+        const response = await fetch(`http://127.0.0.1:5555/restaurants/${id}`);
         if (!response.ok) {
             throw new Error("Restaurant not found");
         }
@@ -29,7 +29,7 @@ export async function fetchRestaurantById(id) {
 // Fetch all pizzas
 export async function fetchPizzas() {
     try {
-        const response = await fetch("http://localhost:5555/pizzas");
+        const response = await fetch("http://127.0.0.1:5555/pizzas");
         if (!response.ok) {
             throw new Error("Failed to fetch pizzas");
         }
@@ -43,7 +43,7 @@ export async function fetchPizzas() {
 // Create a new RestaurantPizza
 export async function createRestaurantPizza({ pizza_id, restaurant_id, price }) {
     try {
-        const response = await fetch("http://localhost:5555/restaurant_pizzas", {
+        const response = await fetch("http://127.0.0.1:5555/restaurant_pizzas", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -64,7 +64,7 @@ export async function createRestaurantPizza({ pizza_id, restaurant_id, price }) 
 // Delete a restaurant by ID
 export async function deleteRestaurant(id) {
     try {
-        const response = await fetch(`http://localhost:5555/restaurants/${id}`, {
+        const response = await fetch(`http://127.0.0.1:5555/restaurants/${id}`, {
             method: "DELETE",
         });
         if (!response.ok) {
