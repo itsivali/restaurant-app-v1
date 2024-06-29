@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from flask import Flask, request, jsonify, abort
 from flask_migrate import Migrate
-from flask_cors import CORS  # Add this import
+from flask_cors import CORS  # Import CORS
 from models import db, Restaurant, RestaurantPizza, Pizza
 
 app = Flask(__name__)
@@ -10,7 +10,9 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 migrate = Migrate(app, db)
 db.init_app(app)
-CORS(app)  # Add this line to enable CORS
+
+# Configure CORS
+CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all origins for development
 
 @app.route("/restaurants", methods=["GET"])
 def get_restaurants():
