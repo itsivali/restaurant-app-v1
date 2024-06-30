@@ -2,6 +2,8 @@ import { Route, Switch } from "react-router";
 import Home from "./components/Home";
 import Navbar from "./components/Navbar";
 import Restaurant from "./components/Restaurant";
+import PizzaList from "./components/PizzaList";
+import PizzaDetail from "./components/PizzaDetail";
 
 function App() {
   return (
@@ -10,6 +12,12 @@ function App() {
       <Switch>
         <Route exact path="/restaurants/:id">
           <Restaurant />
+        </Route>
+        <Route exact path="/pizzas">
+          <PizzaList />
+        </Route>
+        <Route exact path="/pizzas/:id">
+          <PizzaDetail />
         </Route>
         <Route exact path="/">
           <Home />
