@@ -1,24 +1,20 @@
-import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_cors import CORS  
+from flask_cors import CORS
+from dotenv import load_dotenv
+from .config import Config 
 
 db = SQLAlchemy()
-migrate = Migrate()
 
 def create_app():
+    load_dotenv() 
     app = Flask(__name__)
-    config_path = os.path.abspath(os.path.join('server', 'config.py'))
-    print(f"Loading configuration from: {config_path}")  
-    app.config.from_object('server.config.Config')  
-    
-    CORS(app, resources={r"/*": {"origins": "*"}})
-
+    app.config.from_object(Config) 
     db.init_app(app)
-    migrate.init_app(app, db)
-
-    from .routes import register_routes
-    register_routes(app)
-
+    CORS(app)
+    
+    with app.app_context():
+        from .routes import register_routes
+        register_routes(app)
+    
     return app
