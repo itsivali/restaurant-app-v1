@@ -38,6 +38,46 @@ export async function fetchRestaurantById(id) {
     }
 }
 
+// Create a new restaurant
+export async function createRestaurant({ name, address }) {
+    try {
+        const response = await fetch(`${API_URL}/restaurants`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ name, address }),
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error);
+        }
+        return response.json();
+    } catch (error) {
+        console.error("Error creating restaurant:", error);
+        throw error;
+    }
+}
+
+// Delete a restaurant by ID
+export async function deleteRestaurant(id) {
+    try {
+        const response = await fetch(`${API_URL}/restaurants/${id}`, {
+            method: "DELETE",
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        if (!response.ok) {
+            throw new Error("Failed to delete restaurant");
+        }
+        return response.json();
+    } catch (error) {
+        console.error("Error deleting restaurant:", error);
+        throw error;
+    }
+}
+
 // Fetch all pizzas
 export async function fetchPizzas() {
     try {
@@ -76,7 +116,7 @@ export async function fetchPizzaById(id) {
     }
 }
 
-// Create a new Pizza
+// Create a new pizza
 export async function createPizza({ name, ingredients }) {
     try {
         const response = await fetch(`${API_URL}/pizzas`, {
@@ -97,7 +137,7 @@ export async function createPizza({ name, ingredients }) {
     }
 }
 
-// Update an existing Pizza by ID
+// Update an existing pizza by ID
 export async function updatePizza(id, { name, ingredients }) {
     try {
         const response = await fetch(`${API_URL}/pizzas/${id}`, {
@@ -154,25 +194,6 @@ export async function createRestaurantPizza({ pizza_id, restaurant_id, price }) 
         return response.json();
     } catch (error) {
         console.error("Error creating restaurant pizza:", error);
-        throw error;
-    }
-}
-
-// Delete a restaurant by ID
-export async function deleteRestaurant(id) {
-    try {
-        const response = await fetch(`${API_URL}/restaurants/${id}`, {
-            method: "DELETE",
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        if (!response.ok) {
-            throw new Error("Failed to delete restaurant");
-        }
-        return response.json();
-    } catch (error) {
-        console.error("Error deleting restaurant:", error);
         throw error;
     }
 }

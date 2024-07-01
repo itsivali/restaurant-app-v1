@@ -8,11 +8,7 @@ def register_routes(app):
         """Retrieve all restaurants."""
         try:
             restaurants = Restaurant.query.all()
-            result = [{
-                'id': r.id,
-                'name': r.name,
-                'address': r.address
-            } for r in restaurants]
+            result = [r.to_dict() for r in restaurants]
             return jsonify(result), 200
         except Exception as e:
             print(f"Error: {e}")
@@ -22,29 +18,35 @@ def register_routes(app):
     def get_restaurant(id):
         """Retrieve a restaurant by ID."""
         restaurant = Restaurant.query.get(id)
-        if restaurant is None:
+        if not restaurant:
             return jsonify({'error': 'Restaurant not found'}), 404
-        result = {
-            'id': restaurant.id,
-            'name': restaurant.name,
-            'address': restaurant.address,
-            'restaurant_pizzas': [{
-                'id': rp.id,
-                'price': rp.price,
-                'pizza': {
-                    'id': rp.pizza.id,
-                    'name': rp.pizza.name,
-                    'ingredients': rp.pizza.ingredients
-                }
-            } for rp in restaurant.restaurant_pizzas]
-        }
-        return jsonify(result), 200
+        return jsonify(restaurant.to_dict()), 200
+
+    @app.route('/restaurants', methods=['POST'])
+    def create_restaurant():
+        """Create a new restaurant."""
+        data = request.get_json()
+        name = data.get('name')
+        address = data.get('address')
+
+        if not name or not address:
+            return jsonify({'error': 'Missing data'}), 400
+
+        try:
+            new_restaurant = Restaurant(name=name, address=address)
+            db.session.add(new_restaurant)
+            db.session.commit()
+            return jsonify(new_restaurant.to_dict()), 201
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error creating restaurant: {e}")
+            return jsonify({'error': 'Database error'}), 500
 
     @app.route('/restaurants/<int:id>', methods=['DELETE'])
     def delete_restaurant(id):
         """Delete a restaurant by ID."""
         restaurant = Restaurant.query.get(id)
-        if restaurant is None:
+        if not restaurant:
             return jsonify({'error': 'Restaurant not found'}), 404
         try:
             db.session.delete(restaurant)
@@ -60,11 +62,7 @@ def register_routes(app):
         """Retrieve all pizzas."""
         try:
             pizzas = Pizza.query.all()
-            result = [{
-                'id': p.id,
-                'name': p.name,
-                'ingredients': p.ingredients
-            } for p in pizzas]
+            result = [p.to_dict() for p in pizzas]
             return jsonify(result), 200
         except Exception as e:
             print(f"Error: {e}")
@@ -74,14 +72,9 @@ def register_routes(app):
     def get_pizza(id):
         """Retrieve a pizza by ID."""
         pizza = Pizza.query.get(id)
-        if pizza is None:
+        if not pizza:
             return jsonify({'error': 'Pizza not found'}), 404
-        result = {
-            'id': pizza.id,
-            'name': pizza.name,
-            'ingredients': pizza.ingredients
-        }
-        return jsonify(result), 200
+        return jsonify(pizza.to_dict()), 200
 
     @app.route('/restaurant_pizzas', methods=['POST'])
     def create_restaurant_pizza():
@@ -92,16 +85,16 @@ def register_routes(app):
         restaurant_id = data.get('restaurant_id')
 
         if price is None or not (1 <= price <= 30):
-            return jsonify({'errors': ['validation errors']}), 400
+            return jsonify({'errors': ['Validation error: price must be between 1 and 30']}), 400
 
         if pizza_id is None or restaurant_id is None:
-            return jsonify({'errors': ['validation errors']}), 400
+            return jsonify({'errors': ['Validation error: missing pizza_id or restaurant_id']}), 400
 
         pizza = Pizza.query.get(pizza_id)
         restaurant = Restaurant.query.get(restaurant_id)
 
-        if pizza is None or restaurant is None:
-            return jsonify({'errors': ['validation errors']}), 400
+        if not pizza or not restaurant:
+            return jsonify({'errors': ['Validation error: invalid pizza_id or restaurant_id']}), 400
 
         try:
             restaurant_pizza = RestaurantPizza(
@@ -111,24 +104,8 @@ def register_routes(app):
             )
             db.session.add(restaurant_pizza)
             db.session.commit()
-            result = {
-                'id': restaurant_pizza.id,
-                'price': restaurant_pizza.price,
-                'pizza_id': restaurant_pizza.pizza_id,
-                'restaurant_id': restaurant_pizza.restaurant_id,
-                'pizza': {
-                    'id': pizza.id,
-                    'name': pizza.name,
-                    'ingredients': pizza.ingredients
-                },
-                'restaurant': {
-                    'id': restaurant.id,
-                    'name': restaurant.name,
-                    'address': restaurant.address
-                }
-            }
-            return jsonify(result), 201
+            return jsonify(restaurant_pizza.to_dict()), 201
         except Exception as e:
             db.session.rollback()
-            print(f"Error: {e}")
+            print(f"Error creating restaurant pizza: {e}")
             return jsonify({'error': 'Database error'}), 500
