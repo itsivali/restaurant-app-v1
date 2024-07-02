@@ -1,90 +1,58 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import PizzaForm from "./PizzaForm";
-import { fetchRestaurantById, createRestaurantPizza, createPizza } from "../api";
+import React, { useState, useEffect } from 'react';
+import { getRestaurants, createRestaurant } from '../api';
 
-function Restaurant() {
-  const { id } = useParams();
-  const [restaurant, setRestaurant] = useState({
-    data: null,
-    error: null,
-    status: "pending",
-  });
+function Restaurants() {
+  const [restaurants, setRestaurants] = useState([]);
+  const [name, setName] = useState('');
+  const [address, setAddress] = useState('');
 
   useEffect(() => {
-    let isMounted = true;
+    fetchRestaurants();
+  }, []);
 
-    fetchRestaurantById(id)
-      .then((data) => {
-        if (isMounted) {
-          setRestaurant({ data, error: null, status: "resolved" });
-        }
-      })
-      .catch((err) => {
-        if (isMounted) {
-          setRestaurant({ data: null, error: err.message, status: "rejected" });
-        }
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [id]);
-
-  async function handleCreatePizza(name, ingredients, price) {
+  const fetchRestaurants = async () => {
     try {
-      const pizzaResponse = await createPizza({ name, ingredients });
-      const pizzaId = pizzaResponse.id;
-
-      const newRestaurantPizza = { pizza_id: pizzaId, restaurant_id: id, price: parseFloat(price) };
-      const response = await createRestaurantPizza(newRestaurantPizza);
-      handleAddPizza(response);
+      const response = await getRestaurants();
+      setRestaurants(response.data);
     } catch (error) {
-      console.error("Error creating pizza:", error);
+      console.error('Error fetching restaurants:', error);
     }
-  }
+  };
 
-  function handleAddPizza(newRestaurantPizza) {
-    setRestaurant((prevState) => ({
-      ...prevState,
-      data: {
-        ...prevState.data,
-        restaurant_pizzas: [...(prevState.data?.restaurant_pizzas || []), newRestaurantPizza],
-      },
-    }));
-  }
-
-  if (restaurant.status === "pending") return <h1>Loading...</h1>;
-  if (restaurant.status === "rejected") return <h1>Error: {restaurant.error}</h1>;
-
-  const { data: restaurantData } = restaurant;
+  const handleCreateRestaurant = async () => {
+    try {
+      const newRestaurant = { name, address };
+      await createRestaurant(newRestaurant);
+      fetchRestaurants();
+    } catch (error) {
+      console.error('Error creating restaurant:', error);
+    }
+  };
 
   return (
-    <section className="container">
-      <div className="card">
-        <h1>{restaurantData?.name}</h1>
-        <p>{restaurantData?.address}</p>
-      </div>
-      <div className="card">
-        <h2>Pizza Menu</h2>
-        {restaurantData?.restaurant_pizzas?.length ? (
-          restaurantData.restaurant_pizzas.map((restaurantPizza) => (
-            <div key={restaurantPizza.id}>
-              <h3>{restaurantPizza.pizza.name}</h3>
-              <p><em>{restaurantPizza.pizza.ingredients}</em></p>
-              <p><em>Price ${restaurantPizza.price}</em></p>
-            </div>
-          ))
-        ) : (
-          <p>No pizzas available</p>
-        )}
-      </div>
-      <div className="card">
-        <h3>Add New Pizza</h3>
-        <PizzaForm onCreatePizza={handleCreatePizza} />
-      </div>
-    </section>
+    <div>
+      <h2>Restaurants</h2>
+      <ul>
+        {restaurants.map(restaurant => (
+          <li key={restaurant.id}>{restaurant.name} - {restaurant.address}</li>
+        ))}
+      </ul>
+      <h2>Create Restaurant</h2>
+      <input
+        type="text"
+        placeholder="Name"
+        value={name}
+        onChange={e => setName(e.target.value)}
+      />
+      <input
+        type="text"
+        placeholder="Address"
+        value={address}
+        onChange={e => setAddress(e.target.value)}
+      />
+      <button onClick={handleCreateRestaurant}>Create</button>
+    </div>
   );
 }
 
-export default Restaurant;
+export default Restaurants;

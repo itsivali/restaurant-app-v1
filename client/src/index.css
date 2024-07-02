@@ -16,7 +16,8 @@ header {
   padding: 8px;
   background-color: wheat;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
+  /* Center the header content */
 }
 
 header .logo {
@@ -34,6 +35,7 @@ header .logo img {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -43,25 +45,98 @@ header nav {
   display: flex;
   align-items: center;
   padding: 8px;
+  justify-content: center;
+  /* Center the navigation links */
 }
 
 header nav a {
   font-size: 1.5rem;
+  margin: 0 15px;
+  /* Space between navigation links */
 }
 
 .container {
   max-width: 800px;
   margin: 0 auto;
+  padding: 16px;
+  /* Add padding inside the container */
 }
 
 .card {
   background-color: wheat;
   padding: 16px;
   margin: 16px 0;
-  border-radius: 8px;
+  border-radius: 12px;
+  /* Rounded corners for the card */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  /* Grey shadow for the card */
+}
+
+.card h2 {
+  margin-top: 0;
+}
+
+.card p {
+  margin-bottom: 0;
+}
+
+.form-container {
+  max-width: 500px;
+  /* Limit the form container width */
+  margin: 0 auto;
+  /* Center the form container horizontally */
+  padding: 16px;
 }
 
 form {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  gap: 16px;
+  /* Spacing between form elements */
+  align-items: center;
+  /* Center form elements horizontally */
+}
+
+input[type="text"],
+input[type="number"],
+textarea {
+  padding: 10px;
+  border-radius: 8px;
+  /* Rounded corners for text boxes */
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  /* Include padding and border in element's total width and height */
+  width: 100%;
+  /* Full width of the form container */
+}
+
+textarea {
+  resize: vertical;
+  /* Allow vertical resizing only */
+  min-height: 100px;
+  /* Minimum height for textarea */
+}
+
+button {
+  padding: 10px;
+  border-radius: 8px;
+  /* Rounded corners for the button */
+  border: none;
+  background-color: blue;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  width: 100%;
+  /* Full width of the form container */
+  box-sizing: border-box;
+  /* Ensure button is the same width as the text boxes */
+}
+
+button:hover {
+  background-color: darkblue;
+}
+
+button:disabled {
+  background-color: grey;
+  cursor: not-allowed;
 }

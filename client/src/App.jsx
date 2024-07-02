@@ -1,29 +1,28 @@
-import { Route, Switch } from "react-router";
-import Home from "./components/Home";
-import Navbar from "./components/Navbar";
-import Restaurant from "./components/Restaurant";
-import PizzaList from "./components/PizzaList";
-import PizzaDetail from "./components/PizzaDetail";
+import React from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Home from './components/Home';
+import Restaurants from './components/RestaurantsList';
+import RestaurantDetails from './components/RestaurantDetails';
+import Pizzas from './components/Pizzas';
+import PizzaDetails from './components/PizzaDetails';
+import RestaurantPizzas from './components/RestaurantPizzas';
 
 function App() {
   return (
-    <>
-      <Navbar />
-      <Switch>
-        <Route exact path="/restaurants/:id">
-          <Restaurant />
-        </Route>
-        <Route exact path="/pizzas">
-          <PizzaList />
-        </Route>
-        <Route exact path="/pizzas/:id">
-          <PizzaDetail />
-        </Route>
-        <Route exact path="/">
-          <Home />
-        </Route>
-      </Switch>
-    </>
+    <Router>
+      <div>
+        <Navbar />
+        <Switch>
+          <Route path="/" exact component={Home} />
+          <Route path="/restaurants" exact component={Restaurants} />
+          <Route path="/restaurants/:id" component={RestaurantDetails} />
+          <Route path="/pizzas" exact component={Pizzas} />
+          <Route path="/pizzas/:id" component={PizzaDetails} />
+          <Route path="/restaurant-pizzas" component={RestaurantPizzas} />
+        </Switch>
+      </div>
+    </Router>
   );
 }
 

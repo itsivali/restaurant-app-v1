@@ -100,14 +100,21 @@ def register_routes(app):
         data = request.get_json()
         name = data.get('name')
         ingredients = data.get('ingredients')
+        restaurant_id = data.get('restaurant_id')  # Added restaurant_id
 
-        if not name or not ingredients:
+        if not name or not ingredients or restaurant_id is None:
             return jsonify({'error': 'Missing data'}), 400
 
         try:
             new_pizza = Pizza(name=name, ingredients=ingredients)
             db.session.add(new_pizza)
             db.session.commit()
+
+            # Create association with restaurant
+            restaurant_pizza = RestaurantPizza(price=0, pizza_id=new_pizza.id, restaurant_id=restaurant_id)
+            db.session.add(restaurant_pizza)
+            db.session.commit()
+
             return jsonify(new_pizza.to_dict()), 201
         except Exception as e:
             db.session.rollback()
@@ -152,6 +159,16 @@ def register_routes(app):
             return jsonify({'error': 'Database error'}), 500
 
     # Routes for RestaurantPizza
+    @app.route('/restaurant_pizzas/<int:restaurant_id>', methods=['GET'])
+    def get_restaurant_pizzas(restaurant_id):
+        try:
+            restaurant_pizzas = RestaurantPizza.query.filter_by(restaurant_id=restaurant_id).all()
+            result = [rp.to_dict() for rp in restaurant_pizzas]
+            return jsonify(result), 200
+        except Exception as e:
+            print(f"Error: {e}")
+            return jsonify({'error': 'Database error'}), 500
+
     @app.route('/restaurant_pizzas', methods=['POST'])
     def create_restaurant_pizza():
         data = request.get_json()
