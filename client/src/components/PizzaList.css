@@ -1,0 +1,16 @@
+.list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.list-item-actions {
+    display: flex;
+    justify-content: center;
+}
+
+button {
+    margin: 0 5px;
+}

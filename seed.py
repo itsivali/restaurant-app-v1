@@ -1,15 +1,16 @@
 import sys
 import os
-#  project root directory to the PYTHONPATH
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from server import create_app, db
-print("Current working directory:", os.getcwd())
-print("Python path:", sys.path)
 from server.models import Restaurant, Pizza, RestaurantPizza
 
-app = create_app()
+# Ensure the project root is in the Python path
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 def seed_data():
+    # Create the application instance
+    app = create_app()
+    
+    # Set up the application context
     with app.app_context():
         print("Deleting data...")
         RestaurantPizza.query.delete()
@@ -29,9 +30,9 @@ def seed_data():
         pizzas = [cheese, pepperoni, california]
 
         print("Creating RestaurantPizza...")
-        pr1 = RestaurantPizza(restaurant=shack, pizza=cheese, price=1)
-        pr2 = RestaurantPizza(restaurant=bistro, pizza=pepperoni, price=4)
-        pr3 = RestaurantPizza(restaurant=palace, pizza=california, price=5)
+        pr1 = RestaurantPizza(restaurant=shack, pizza=cheese, price=10.0)
+        pr2 = RestaurantPizza(restaurant=bistro, pizza=pepperoni, price=15.0)
+        pr3 = RestaurantPizza(restaurant=palace, pizza=california, price=20.0)
         restaurant_pizzas = [pr1, pr2, pr3]
 
         db.session.add_all(restaurants)

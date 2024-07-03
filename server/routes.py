@@ -1,203 +1,156 @@
-from flask import request, jsonify
-from . import db
-from .models import Restaurant, Pizza, RestaurantPizza
+from flask import Blueprint, jsonify, request, abort
+from .models import db, Restaurant, Pizza, RestaurantPizza
 
-def register_routes(app):
-    # Routes for Restaurant
-    @app.route('/restaurants', methods=['GET'])
-    def get_restaurants():
-        try:
-            restaurants = Restaurant.query.all()
-            result = [r.to_dict() for r in restaurants]
-            return jsonify(result), 200
-        except Exception as e:
-            print(f"Error: {e}")
-            return jsonify({'error': 'Database error'}), 500
+bp = Blueprint('main', __name__)
 
-    @app.route('/restaurants/<int:id>', methods=['GET'])
-    def get_restaurant(id):
-        restaurant = Restaurant.query.get(id)
-        if not restaurant:
-            return jsonify({'error': 'Restaurant not found'}), 404
-        return jsonify(restaurant.to_dict()), 200
+@bp.route('/restaurants', methods=['GET'])
+def get_restaurants():
+    restaurants = Restaurant.query.all()
+    return jsonify([restaurant.to_dict() for restaurant in restaurants])
 
-    @app.route('/restaurants', methods=['POST'])
-    def create_restaurant():
-        data = request.get_json()
-        name = data.get('name')
-        address = data.get('address')
+@bp.route('/restaurants/<int:id>', methods=['GET'])
+def get_restaurant(id):
+    restaurant = Restaurant.query.get(id)
+    if restaurant is None:
+        abort(404, description="Restaurant not found")
+    return jsonify(restaurant.to_dict())
 
-        if not name or not address:
-            return jsonify({'error': 'Missing data'}), 400
+@bp.route('/restaurants', methods=['POST'])
+def create_restaurant():
+    data = request.get_json()
+    if not data or 'name' not in data or 'address' not in data:
+        abort(400, description="Invalid input")
+    restaurant = Restaurant(name=data['name'], address=data['address'])
+    db.session.add(restaurant)
+    db.session.commit()
+    return jsonify(restaurant.to_dict()), 201
 
-        try:
-            new_restaurant = Restaurant(name=name, address=address)
-            db.session.add(new_restaurant)
-            db.session.commit()
-            return jsonify(new_restaurant.to_dict()), 201
-        except Exception as e:
-            db.session.rollback()
-            print(f"Error creating restaurant: {e}")
-            return jsonify({'error': 'Database error'}), 500
+@bp.route('/restaurants/<int:id>', methods=['PUT'])
+def update_restaurant(id):
+    restaurant = Restaurant.query.get(id)
+    if restaurant is None:
+        abort(404, description="Restaurant not found")
+    
+    data = request.get_json()
+    if not data:
+        abort(400, description="Invalid input")
+    
+    if 'name' in data:
+        restaurant.name = data['name']
+    if 'address' in data:
+        restaurant.address = data['address']
+    
+    db.session.commit()
+    return jsonify(restaurant.to_dict())
 
-    @app.route('/restaurants/<int:id>', methods=['PUT'])
-    def update_restaurant(id):
-        data = request.get_json()
-        restaurant = Restaurant.query.get(id)
-        if not restaurant:
-            return jsonify({'error': 'Restaurant not found'}), 404
+@bp.route('/restaurants/<int:id>', methods=['DELETE'])
+def delete_restaurant(id):
+    restaurant = Restaurant.query.get(id)
+    if restaurant is None:
+        abort(404, description="Restaurant not found")
+    
+    db.session.delete(restaurant)
+    db.session.commit()
+    return jsonify({'message': 'Restaurant deleted'}), 204
 
-        name = data.get('name')
-        address = data.get('address')
+@bp.route('/pizzas', methods=['GET'])
+def get_pizzas():
+    pizzas = Pizza.query.all()
+    return jsonify([pizza.to_dict() for pizza in pizzas])
 
-        if name:
-            restaurant.name = name
-        if address:
-            restaurant.address = address
+@bp.route('/pizzas/<int:id>', methods=['GET'])
+def get_pizza(id):
+    pizza = Pizza.query.get(id)
+    if pizza is None:
+        abort(404, description="Pizza not found")
+    return jsonify(pizza.to_dict())
 
-        try:
-            db.session.commit()
-            return jsonify(restaurant.to_dict()), 200
-        except Exception as e:
-            db.session.rollback()
-            print(f"Error updating restaurant: {e}")
-            return jsonify({'error': 'Database error'}), 500
+@bp.route('/pizzas', methods=['POST'])
+def create_pizza():
+    data = request.get_json()
+    if not data or 'name' not in data or 'ingredients' not in data:
+        abort(400, description="Invalid input")
+    pizza = Pizza(name=data['name'], ingredients=data['ingredients'])
+    db.session.add(pizza)
+    db.session.commit()
+    return jsonify(pizza.to_dict()), 201
 
-    @app.route('/restaurants/<int:id>', methods=['DELETE'])
-    def delete_restaurant(id):
-        restaurant = Restaurant.query.get(id)
-        if not restaurant:
-            return jsonify({'error': 'Restaurant not found'}), 404
-        try:
-            db.session.delete(restaurant)
-            db.session.commit()
-            return '', 204
-        except Exception as e:
-            db.session.rollback()
-            print(f"Error: {e}")
-            return jsonify({'error': 'Database error'}), 500
+@bp.route('/pizzas/<int:id>', methods=['PUT'])
+def update_pizza(id):
+    pizza = Pizza.query.get(id)
+    if pizza is None:
+        abort(404, description="Pizza not found")
+    
+    data = request.get_json()
+    if not data:
+        abort(400, description="Invalid input")
+    
+    if 'name' in data:
+        pizza.name = data['name']
+    if 'ingredients' in data:
+        pizza.ingredients = data['ingredients']
+    
+    db.session.commit()
+    return jsonify(pizza.to_dict())
 
-    # Routes for Pizza
-    @app.route('/pizzas', methods=['GET'])
-    def get_pizzas():
-        try:
-            pizzas = Pizza.query.all()
-            result = [p.to_dict() for p in pizzas]
-            return jsonify(result), 200
-        except Exception as e:
-            print(f"Error: {e}")
-            return jsonify({'error': 'Database error'}), 500
+@bp.route('/pizzas/<int:id>', methods=['DELETE'])
+def delete_pizza(id):
+    pizza = Pizza.query.get(id)
+    if pizza is None:
+        abort(404, description="Pizza not found")
+    
+    db.session.delete(pizza)
+    db.session.commit()
+    return jsonify({'message': 'Pizza deleted'}), 204
 
-    @app.route('/pizzas/<int:id>', methods=['GET'])
-    def get_pizza(id):
-        pizza = Pizza.query.get(id)
-        if not pizza:
-            return jsonify({'error': 'Pizza not found'}), 404
-        return jsonify(pizza.to_dict()), 200
+@bp.route('/restaurant_pizzas', methods=['GET'])
+def get_restaurant_pizzas():
+    restaurant_pizzas = RestaurantPizza.query.all()
+    return jsonify([rp.to_dict() for rp in restaurant_pizzas])
 
-    @app.route('/pizzas', methods=['POST'])
-    def create_pizza():
-        data = request.get_json()
-        name = data.get('name')
-        ingredients = data.get('ingredients')
-        restaurant_id = data.get('restaurant_id')  # Added restaurant_id
+@bp.route('/restaurant_pizzas', methods=['POST'])
+def create_restaurant_pizza():
+    data = request.get_json()
+    if not data or 'restaurant_id' not in data or 'pizza_id' not in data or 'price' not in data:
+        abort(400, description="Invalid input")
+    
+    restaurant_pizza = RestaurantPizza(
+        restaurant_id=data['restaurant_id'],
+        pizza_id=data['pizza_id'],
+        price=data['price']
+    )
+    db.session.add(restaurant_pizza)
+    db.session.commit()
+    return jsonify(restaurant_pizza.to_dict()), 201
 
-        if not name or not ingredients or restaurant_id is None:
-            return jsonify({'error': 'Missing data'}), 400
+@bp.route('/restaurant_pizzas/<int:restaurant_id>/<int:pizza_id>', methods=['PUT'])
+def update_restaurant_pizza(restaurant_id, pizza_id):
+    restaurant_pizza = RestaurantPizza.query.filter_by(
+        restaurant_id=restaurant_id,
+        pizza_id=pizza_id
+    ).first()
+    
+    if restaurant_pizza is None:
+        abort(404, description="Restaurant-Pizza association not found")
+    
+    data = request.get_json()
+    if not data or 'price' not in data:
+        abort(400, description="Invalid input")
+    
+    restaurant_pizza.price = data['price']
+    db.session.commit()
+    return jsonify(restaurant_pizza.to_dict())
 
-        try:
-            new_pizza = Pizza(name=name, ingredients=ingredients)
-            db.session.add(new_pizza)
-            db.session.commit()
-
-            # Create association with restaurant
-            restaurant_pizza = RestaurantPizza(price=0, pizza_id=new_pizza.id, restaurant_id=restaurant_id)
-            db.session.add(restaurant_pizza)
-            db.session.commit()
-
-            return jsonify(new_pizza.to_dict()), 201
-        except Exception as e:
-            db.session.rollback()
-            print(f"Error creating pizza: {e}")
-            return jsonify({'error': 'Database error'}), 500
-
-    @app.route('/pizzas/<int:id>', methods=['PUT'])
-    def update_pizza(id):
-        data = request.get_json()
-        pizza = Pizza.query.get(id)
-        if not pizza:
-            return jsonify({'error': 'Pizza not found'}), 404
-
-        name = data.get('name')
-        ingredients = data.get('ingredients')
-
-        if name:
-            pizza.name = name
-        if ingredients:
-            pizza.ingredients = ingredients
-
-        try:
-            db.session.commit()
-            return jsonify(pizza.to_dict()), 200
-        except Exception as e:
-            db.session.rollback()
-            print(f"Error updating pizza: {e}")
-            return jsonify({'error': 'Database error'}), 500
-
-    @app.route('/pizzas/<int:id>', methods=['DELETE'])
-    def delete_pizza(id):
-        pizza = Pizza.query.get(id)
-        if not pizza:
-            return jsonify({'error': 'Pizza not found'}), 404
-        try:
-            db.session.delete(pizza)
-            db.session.commit()
-            return '', 204
-        except Exception as e:
-            db.session.rollback()
-            print(f"Error: {e}")
-            return jsonify({'error': 'Database error'}), 500
-
-    # Routes for RestaurantPizza
-    @app.route('/restaurant_pizzas/<int:restaurant_id>', methods=['GET'])
-    def get_restaurant_pizzas(restaurant_id):
-        try:
-            restaurant_pizzas = RestaurantPizza.query.filter_by(restaurant_id=restaurant_id).all()
-            result = [rp.to_dict() for rp in restaurant_pizzas]
-            return jsonify(result), 200
-        except Exception as e:
-            print(f"Error: {e}")
-            return jsonify({'error': 'Database error'}), 500
-
-    @app.route('/restaurant_pizzas', methods=['POST'])
-    def create_restaurant_pizza():
-        data = request.get_json()
-        price = data.get('price')
-        pizza_id = data.get('pizza_id')
-        restaurant_id = data.get('restaurant_id')
-
-        if price is None or not (1 <= price <= 30):
-            return jsonify({'errors': ['Validation error: price must be between 1 and 30']}), 400
-
-        if pizza_id is None or restaurant_id is None:
-            return jsonify({'errors': ['Validation error: missing pizza_id or restaurant_id']}), 400
-
-        pizza = Pizza.query.get(pizza_id)
-        restaurant = Restaurant.query.get(restaurant_id)
-
-        if not pizza or not restaurant:
-            return jsonify({'errors': ['Validation error: invalid pizza_id or restaurant_id']}), 400
-
-        try:
-            restaurant_pizza = RestaurantPizza(
-                price=price,
-                pizza_id=pizza_id,
-                restaurant_id=restaurant_id
-            )
-            db.session.add(restaurant_pizza)
-            db.session.commit()
-            return jsonify(restaurant_pizza.to_dict()), 201
-        except Exception as e:
-            db.session.rollback()
-            print(f"Error creating restaurant pizza: {e}")
-            return jsonify({'error': 'Database error'}), 500
+@bp.route('/restaurant_pizzas/<int:restaurant_id>/<int:pizza_id>', methods=['DELETE'])
+def delete_restaurant_pizza(restaurant_id, pizza_id):
+    restaurant_pizza = RestaurantPizza.query.filter_by(
+        restaurant_id=restaurant_id,
+        pizza_id=pizza_id
+    ).first()
+    
+    if restaurant_pizza is None:
+        abort(404, description="Restaurant-Pizza association not found")
+    
+    db.session.delete(restaurant_pizza)
+    db.session.commit()
+    return jsonify({'message': 'Restaurant-Pizza association deleted'}), 204

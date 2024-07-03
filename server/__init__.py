@@ -1,19 +1,18 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from .config import Config
+from .models import db
+import os
 
-db = SQLAlchemy()
-
-def create_app(config_class=Config):
+def create_app():
     app = Flask(__name__)
-    CORS(app)
-    app.config.from_object(config_class)
+    
+    app.config.from_object('server.config.Config')
+
     db.init_app(app)
 
-    with app.app_context():
-        from .routes import register_routes
-        register_routes(app)
-        db.create_all()
+    CORS(app, origins=["http://localhost:3000"])
+
+    from .routes import bp as main_bp
+    app.register_blueprint(main_bp)
 
     return app

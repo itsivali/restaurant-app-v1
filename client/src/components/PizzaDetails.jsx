@@ -1,80 +1,56 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
-import { getPizza, updatePizza, deletePizza } from '../api';
+import { useParams } from 'react-router-dom';
+import { getPizza, getPizzaRestaurants } from '../api';
 
 function PizzaDetails() {
     const { id } = useParams();
     const [pizza, setPizza] = useState(null);
-    const [name, setName] = useState('');
-    const [ingredients, setIngredients] = useState('');
-    const history = useHistory();
+    const [restaurants, setRestaurants] = useState([]);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchPizza = async () => {
             try {
                 const response = await getPizza(id);
                 setPizza(response.data);
-                setName(response.data.name);
-                setIngredients(response.data.ingredients);
             } catch (error) {
                 console.error('Error fetching pizza:', error);
+                setError('Error fetching pizza.');
+            }
+        };
+
+        const fetchRestaurants = async () => {
+            try {
+                const response = await getPizzaRestaurants(id);
+                setRestaurants(response.data);
+            } catch (error) {
+                console.error('Error fetching restaurants for pizza:', error);
+                setError('Error fetching restaurants for pizza.');
             }
         };
 
         fetchPizza();
+        fetchRestaurants();
     }, [id]);
 
-    const handleUpdate = async (e) => {
-        e.preventDefault();
-        try {
-            await updatePizza(id, { name, ingredients });
-            history.push('/pizzas');
-        } catch (error) {
-            console.error('Error updating pizza:', error);
-        }
-    };
-
-    const handleDelete = async () => {
-        try {
-            await deletePizza(id);
-            history.push('/pizzas');
-        } catch (error) {
-            console.error('Error deleting pizza:', error);
-        }
-    };
-
     return (
-        <div className="container">
+        <div>
+            <h2>Pizza Details</h2>
+            {error && <p>{error}</p>}
             {pizza && (
-                <div className="card">
-                    <h2>Pizza: {pizza.name}</h2>
+                <div>
+                    <h3>{pizza.name}</h3>
                     <p>Ingredients: {pizza.ingredients}</p>
-
-                    <form onSubmit={handleUpdate}>
-                        <label>
-                            Name:
-                            <input
-                                type="text"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                required
-                            />
-                        </label>
-                        <label>
-                            Ingredients:
-                            <input
-                                type="text"
-                                value={ingredients}
-                                onChange={(e) => setIngredients(e.target.value)}
-                                required
-                            />
-                        </label>
-                        <button type="submit">Update Pizza</button>
-                    </form>
-
-                    <div className="button-container">
-                        <button onClick={handleDelete}>Delete Pizza</button>
-                    </div>
+                    <h4>Restaurants:</h4>
+                    <ul>
+                        {restaurants.length > 0 ? (
+                            restaurants.map((restaurant) => (
+                                <li key={restaurant.id}>{restaurant.name}</li>
+                            ))
+                        ) : (
+                            <p>No restaurants serve this pizza.</p>
+                        )}
+                    </ul>
                 </div>
             )}
         </div>

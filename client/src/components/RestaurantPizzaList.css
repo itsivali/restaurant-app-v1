@@ -1,0 +1,38 @@
+.table-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 16px;
+    background-color: #fff;
+    /* White background for the table */
+    border-radius: 8px;
+    /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* Subtle shadow */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th,
+table td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+table th {
+    background-color: #f4f4f4;
+
+}
+
+table tr:nth-child(even) {
+    background-color: #b1a1a1;
+
+}
+
+table tr:hover {
+    background-color: #c58787;
+ 
+}

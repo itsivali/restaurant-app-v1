@@ -1,20 +1,17 @@
 import axios from 'axios';
 
-const api = axios.create({
-    baseURL: 'http://127.0.0.1:5000',
-});
+const API_BASE_URL = 'http://127.0.0.1:5000';
 
-export const getRestaurants = () => api.get('/restaurants');
-export const getRestaurant = (id) => api.get(`/restaurants/${id}`);
-export const createRestaurant = (data) => api.post('/restaurants', data);
-export const updateRestaurant = (id, data) => api.put(`/restaurants/${id}`, data);
-export const deleteRestaurant = (id) => api.delete(`/restaurants/${id}`);
+export const getRestaurants = () => axios.get(`${API_BASE_URL}/restaurants`);
+export const getPizzas = () => axios.get(`${API_BASE_URL}/pizzas`);
+export const createRestaurant = (data) => axios.post(`${API_BASE_URL}/restaurants`, data);
+export const updateRestaurant = (id, data) => axios.put(`${API_BASE_URL}/restaurants/${id}`, data);
+export const deleteRestaurant = (id) => axios.delete(`${API_BASE_URL}/restaurants/${id}`);
+export const getRestaurant = (id) => axios.get(`${API_BASE_URL}/restaurants/${id}`);
 
-export const getPizzas = () => api.get('/pizzas');
-export const getPizza = (id) => api.get(`/pizzas/${id}`);
-export const createPizza = (data) => api.post('/pizzas', data);
-export const updatePizza = (id, data) => api.put(`/pizzas/${id}`, data);
-export const deletePizza = (id) => api.delete(`/pizzas/${id}`);
-
-export const getRestaurantPizzas = (id) => api.get(`/restaurants/${id}/pizzas`);
-export const createRestaurantPizza = (data) => api.post('/restaurant_pizzas', data);
+export const createPizza = (data) => axios.post(`${API_BASE_URL}/pizzas`, data);
+export const updatePizza = (id, data) => axios.put(`${API_BASE_URL}/pizzas/${id}`, data);
+export const deletePizza = (id) => axios.delete(`${API_BASE_URL}/pizzas/${id}`);
+export const getPizza = (id) => axios.get(`${API_BASE_URL}/pizzas/${id}`);
+export const getRestaurantPizzas = (id) => axios.get(`${API_BASE_URL}/restaurants/${id}/pizzas`);
+export const getPizzaRestaurants = (id) => axios.get(`${API_BASE_URL}/pizzas/${id}/restaurants`);
